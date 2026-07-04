@@ -7,7 +7,7 @@ def exibir_tabuleiro():
     for i in range(3):
         print(" | ".join(tabuleiro[i]))
         if i < 2:
-            print("---------")
+            print("-" *9)
 
 
 def verificar_vitoria():
@@ -30,6 +30,17 @@ def verificar_vitoria():
     return False
 
 
+#verificar empate
+def verificar_empate():
+    """Verifica se o tabuleiro está completamente preenchido"""
+    for i in range(3):
+        for j in range(3):
+            if tabuleiro[i][j] == " ":
+                return False
+            print("Empate!")
+    return True
+
+
 def jogar():
     jogador = "X"
     for _ in range(9):
@@ -49,7 +60,7 @@ def jogar():
 
 jogar()
 
-#jogar novamente ou encerrar o jogo
+#jgar novamente ou encerrar o jogo
 print()
 print("Jogar novamente? (s/n)")
 if input().lower() == "s":
@@ -57,3 +68,13 @@ if input().lower() == "s":
     jogar()
 else:
     print("Fim do jogo!")
+def main():
+    jogar()
+    while True:
+        print("\nJogar novamente? (s/n)")
+        if input().lower() == "s":
+            global tabuleiro
+            tabuleiro = [[" " for _ in range(3)] for _ in range(3)]
+            jogar()
+        else:
+            print("Fim do jogo!")
