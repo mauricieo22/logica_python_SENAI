@@ -1,12 +1,19 @@
 def menu():
     print("Selecione a opção desejada (0 a 6):")
-    print("0 - Adicionar filme (opcional)")
+    print("0 - Adicionar filme")
     print("1 - Quantidade total de filmes")
     print("2 - Informações de um filme pelo título")
     print("3 - Filmes de um diretor específico")
     print("4 - Filmes de um gênero específico")
     print("5 - Média de duração dos filmes")
     print("6 - Sair")
+
+def ler_filmes():
+    try:
+        with open("filmes.txt", encoding="utf-8") as f:
+            return [linha.strip() for linha in f if linha.strip()]
+    except FileNotFoundError:
+        return []
 
 def adicionar_filme():
     titulo = input("Digite o título do filme: ")
@@ -15,23 +22,14 @@ def adicionar_filme():
     duracao = input("Digite a duração do filme (em minutos): ")
 
     with open("filmes.txt", "a", encoding="utf-8") as f:
-        f.write(f"{titulo},{diretor},{genero},{duracao}\n") 
+        f.write(f"{titulo},{diretor},{genero},{duracao}\n")
 
-# opção 1
 def quantidade_total_de_filmes():
-    contador = 0
-    try:
-        with open("filmes.txt", encoding="utf-8") as f:
-            for linha in f:
-                if linha.strip().startswith("Título:"):
-                    contador += 1
-    except FileNotFoundError:
-        print("Arquivo'filmes.txt' não encontrado.")
-        return 0
+    filmes = ler_filmes()
+    contador = len(filmes)
     print(f"Quantidade total de filmes: {contador}\n")
     return contador
 
-#opção 2
 def info_por_titulo():
     titulo_busca = input("Digite o título do filme: ").strip().lower()
     filmes = ler_filmes()
@@ -47,8 +45,7 @@ def info_por_titulo():
             break
     if not achou:
         print("Filme não encontrado.")
-        
-#opçaõ 3:
+
 def filmes_por_diretor():
     diretor_busca = input("Digite o nome do diretor: ").strip().lower()
     filmes = ler_filmes()
@@ -56,11 +53,39 @@ def filmes_por_diretor():
     for filme in filmes:
         partes = filme.split(",")
         if len(partes) >= 4 and partes[1].strip().lower() == diretor_busca:
-            print(filme)
+            print(f"Título: {partes[0].strip()} | Diretor: {partes[1].strip()} | Gênero: {partes[2].strip()} | Duração: {partes[3].strip()} min")
             encontrados = True
     if not encontrados:
         print("Nenhum filme encontrado para este diretor.")
 
+def filmes_por_genero():
+    genero_busca = input("Digite o gênero do filme: ").strip().lower()
+    filmes = ler_filmes()
+    encontrados = False
+    for filme in filmes:
+        partes = filme.split(",")
+        if len(partes) >= 4 and partes[2].strip().lower() == genero_busca:
+            print(f"Título: {partes[0].strip()} | Diretor: {partes[1].strip()} | Gênero: {partes[2].strip()} | Duração: {partes[3].strip()} min")
+            encontrados = True
+    if not encontrados:
+        print("Nenhum filme encontrado para este gênero.")
+
+def media_duracao():
+    filmes = ler_filmes()
+    duracoes = []
+    for filme in filmes:
+        partes = filme.split(",")
+        if len(partes) >= 4:
+            try:
+                duracoes.append(float(partes[3].strip()))
+            except ValueError:
+                pass
+    if not duracoes:
+        print("Não há duração válida para cálculo.")
+        return 0
+    media = sum(duracoes) / len(duracoes)
+    print(f"Média de duração dos filmes: {media:.2f} minutos")
+    return media
 
 if __name__ == "__main__":
     while True:
