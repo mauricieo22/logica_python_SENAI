@@ -1,4 +1,13 @@
 {
     "workbench.editor.tabSizingFixedMaxWidth": 140,
-    "workbench.editor.doubleClickTabToToggleEditorGroupSizes": "maximize"
+    "workbench.editor.doubleClickTabToToggleEditorGroupSizes": "maximize",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./07_22e24e29",
+        "-p",
+        "*test.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
 }

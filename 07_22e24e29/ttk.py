@@ -1,9 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox
 
 root = tk.Tk()
-root.title("SENAI - Sistemas")
-root.geometry("800x600")
+root.geometry("400x300")
 
 #O código vai aqui!
 label_1 = tk.Label(root, text="Olá!")
