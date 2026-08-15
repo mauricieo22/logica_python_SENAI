@@ -1,9 +1,9 @@
 import tkinter as tk
-from tkinter import ttk, Image, ImageTk
+from tkinter import ttk, Image
 
 #pip install Pillow
-from PIL import Image
-
+import PIL
+from PIL import ImageTk, Image
 #cores--------------------------
 cor0 = "#FFFFFF" # white / branca
 cor1 = "#333333" # black / preta
@@ -21,7 +21,7 @@ janela.configure(bg=fundo)
 frame_cima = tk.Frame(width=260, height=100, bg=cor1,relief="raised")
 frame_cima.grid(row=0,column=0,sticky="nw")
 
-frame_baixo = tk.Frame(width=260, height=300,relief="flat")
+frame_baixo = tk.Frame(width=260, height=300,bg=cor0,relief="flat")
 frame_baixo.grid(row=1,column=0, sticky="nw")
 
 #configurando os jogadores
@@ -40,7 +40,7 @@ app_pessoa_pontos.place(x=50, y=20)
 
 #separação da pontuação
 app_vs = tk.Label(frame_cima, text=":", height=1, anchor="center", bg=cor1, fg=cor0, font=("Ivy 30 bold"))
-app_vs.place(x=125, y=20)
+app_vs.place(x=120, y=20)
 
 #jogador PC
 app_pc= tk.Label(frame_cima, text="PC", height=1, anchor="center", bg=cor1, fg=cor0, font=("Ivy 10 bold"))
@@ -59,10 +59,30 @@ barra_empate = tk.Frame(width=255, height=5,bg=cor2,relief="raised")
 barra_empate.place(x=0, y=95)
 
 #configurando o frame baixo
-icone_pedra = Image.open("./images/pedra.png")
-icone_pedra = icone_pedra.resize((50,50), Image.Resampling.LANCZOS)
-icone_pedra =   ImageTk.PhotoImage(icone_pedra)
+
+#botão pedra
+icone_pedra = PIL.Image.open("pedra.png")
+icone_pedra = icone_pedra.resize((50,50), PIL.Image.Resampling.LANCZOS)
+icone_pedra = PIL.ImageTk.PhotoImage(icone_pedra)
 btn_pedra = tk.Button(frame_baixo, width=50, height=50, image=icone_pedra, compound="center", bg=cor0, fg=cor0, font=("Ivy 10 bold"), anchor="center", relief="flat")
 btn_pedra.place(x=15, y=60)
+
+#botão papel
+icone_papel = PIL.Image.open("papel.png")
+icone_papel = icone_papel.resize((50,50), PIL.Image.Resampling.LANCZOS)
+icone_papel = PIL.ImageTk.PhotoImage(icone_papel)
+btn_papel = tk.Button(frame_baixo, width=50, height=50, image=icone_papel, compound="center", bg=cor0, fg=cor0, font=("Ivy 10 bold"), anchor="center", relief="flat")
+btn_papel.place(x=100, y=60)
+
+#botão tesoura
+icone_tesoura = PIL.Image.open("tesoura.png")
+icone_tesoura = icone_tesoura.resize((50,50), PIL.Image.Resampling.LANCZOS)
+icone_tesoura = PIL.ImageTk.PhotoImage(icone_tesoura)
+btn_tesoura = tk.Button(frame_baixo, width=50, height=50, image=icone_tesoura, compound="center", bg=cor0, fg=cor0, font=("Ivy 10 bold"), anchor="center", relief="flat")
+btn_tesoura.place(x=190, y=60)
+
+#botão "jogar"
+botao_jogar = tk.Button(text="Jogar", width=24, height=1,anchor="center", bg=cor1, fg=cor0, font=("Arial", 12, "bold"))
+botao_jogar.place(x=4, y=243)
 
 janela.mainloop()
