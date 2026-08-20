@@ -32,7 +32,7 @@ frame_baixo.grid(row=1,column=0, sticky="nw")
 app_pessoa = tk.Label(frame_cima, text="Jogador", height=1, anchor="center", bg=cor1, fg=cor0, font=("Ivy 10 bold"))
 app_pessoa.place(x=33, y=70)
 
-#barra marcou pontos
+#barra marcou pontos Pessoa
 app_pessoa_linha = tk.Label(frame_cima, text="", height=10, anchor="center", bg=cor1, fg=cor0, font=("Ivy 10 bold"))
 app_pessoa_linha.place(x=0, y=0)
 
@@ -42,7 +42,7 @@ app_pessoa_pontos.place(x=50, y=20)
 
 #separação da pontuação
 app_vs = tk.Label(frame_cima, text=":", height=1, anchor="center", bg=cor1, fg=cor0, font=("Ivy 30 bold"))
-app_vs.place(x=120, y=20)
+app_vs.place(x=125, y=20)
 
 #jogador PC
 app_pc= tk.Label(frame_cima, text="PC", height=1, anchor="center", bg=cor1, fg=cor0, font=("Ivy 10 bold"))
@@ -69,9 +69,7 @@ app_jogada_pessoa.place (x=10, y=10)
 app_jogada_pc = tk.Label(frame_baixo, text="", height=1, anchor="center",
                            bg=cor0, fg=cor1, font=("Ivy 10 bold"))
 app_jogada_pc.place (x=180, y=10)
-
-
-#configurando o frame baixo
+ 
     
 global escolha_pessoa
 global escolha_pc
@@ -81,9 +79,6 @@ global rodadas
 pontos_pessoa = 0
 pontos_pc = 0
 rodadas = 5
-
-def terminar_jogo():
-    pass
 
 
 def jogar(jogada):
@@ -95,7 +90,6 @@ def jogar(jogada):
     app_pc_linha["bg"] = cor1
     app_pessoa_linha["bg"] = cor1
     barra_empate["bg"] = cor1
-
 
 
     if rodadas > 0:
@@ -113,20 +107,24 @@ def jogar(jogada):
                 return True
             else:
                 return False
+            
+        if testa_empate():
+            barra_empate["bg"] = cor2
+        #caso vitória da rodada pessoa
+        elif (escolha_pessoa == "pedra" and escolha_pc == "tesoura") or (escolha_pessoa == "papel" and escolha_pc == "pedra") or (escolha_pessoa == "tesoura" and escolha_pc == "papel"):
+            pontos_pessoa += 10
+            app_pessoa_linha["bg"] = cor4
+    #caso vitória da rodada PC
+        else:
+            pontos_pc += 10
+            app_pc_linha["bg"] = cor5
 
-
-    if testa_empate():
-        barra_empate["bg"] = cor2
-    #caso vitória pessoa
-    elif (escolha_pessoa == "pedra" and escolha_pc == "tesoura") or (escolha_pessoa == "papel" and escolha_pc == "pedra") or (escolha_pessoa == "tesoura" and escolha_pc == "papel"):
-        pontos_pessoa += 10
-        app_pessoa_linha["bg"] = cor4
-    else:
-        pontos_pc += 10
-        app_pc_linha["bg"] = cor4
+    elif rodadas == 0:
+        verificar_vencedor()
 
     app_pessoa_pontos["text"] = pontos_pessoa
     app_pc_pontos["text"] = pontos_pc
+
 
 def iniciar_jogo():
     global icone_pedra
@@ -160,8 +158,52 @@ def iniciar_jogo():
 
 #botão "jogar"
 botao_jogar = tk.Button(text="Jogar",command=iniciar_jogo, width=24, height=1,anchor="center", bg=cor1, fg=cor0, font=("Arial", 12, "bold"))
-botao_jogar.place(x=4, y=243)
+botao_jogar.place(x=4, y=243,)
+
+#LABEL QUE MOSTRA QUEM GANHOU O JOGO
+vencedor = tk.Label(frame_baixo, text="", height=1, bg=cor0, fg=cor1, font=("Ivy 17 bold"))
+vencedor.place(x=0, y=0, width=260, height=40)
+
+#VERFICAR QUEM GANHOU O JOGO
+def verificar_vencedor():
+    if pontos_pessoa > pontos_pc:
+        vencedor["text"] = "JOGADOR 1 GANHOU!"
+        vencedor["bg"] = cor4
+        vencedor["fg"] = cor1
+
+    elif pontos_pessoa < pontos_pc:
+        vencedor["text"] = "PC GANHOU!"
+        vencedor["bg"] = cor5
+        vencedor["fg"] = cor1
+
+    else:
+        vencedor["text"] = "EMPATE!"
+        vencedor["bg"] = cor3
+        vencedor["fg"] = cor1
 
 
+#REINICIAR O JOGO
+    def reiniciar_jogo():
+        global pontos_pessoa
+        global pontos_pc
+        global rodadas
+        pontos_pessoa = 0
+        pontos_pc = 0
+        rodadas = 5
+
+        app_pessoa_pontos["text"] = "0"
+        app_pc_pontos["text"] = "0"
+        app_jogada_pessoa["text"] = ""
+        app_jogada_pc["text"] = ""
+        app_pessoa_linha["bg"] = cor1
+        app_pc_linha["bg"] = cor1
+        barra_empate["bg"] = cor1
+        vencedor["fg"] = cor0
+        vencedor["bg"] = cor0
+        botao_jogar_novamente["text"] = "Jogar"
+       
+
+    botao_jogar_novamente = tk.Button(text="Jogar novamente",command=reiniciar_jogo, width=24, height=1,anchor="center", bg=cor1, fg=cor0, font=("Arial", 12, "bold"))
+    botao_jogar_novamente.place(x=4, y=243)
 
 janela.mainloop()
