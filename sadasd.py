@@ -1,18 +1,12 @@
-from tkinter import Tk, Label, Entry, Button, PhotoImage
+valor_1 = input("Digite um Valor: ")
+valor_2 = input("Digite um Valor: ")
 
-root = tk.Tk()
-root.title("Senai - Desinvolvimento de Sistemas")   #título da janela
-root.geometry("500x300")  
+valor_3 = input("Digite 1 = mais \n e 2 = menos: ")
 
-imagem_login = PhotoImage(file="images.png")
-label_imagem = Tkinter.Label(root, image=imagem_login, bg="white", width=200, height=200)
-label_imagem.pack(side="left")
+if valor_3 == "1":
+  soma = int(valor_1)+int(valor_2)
+  print(soma)
 
-# Rótulo e Campo de Texto na primeira linha
-Label(root, text="Nome:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-Entry(root).grid(row=0, column=1, padx=10, pady=10)
-
-# Botão ocupando duas colunas na linha abaixo
-Button(root, text="Salvar").grid(row=1, column=0, columnspan=2, pady=10)
-
-root.mainloop()
+if valor_3 == "2":
+  subtracao = int(valor_1)-int(valor_2)
+  print(subtracao)
