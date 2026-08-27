@@ -9,7 +9,7 @@ def apagar_label():
 
 def mostrar_mensagem():
     # Define o texto e agenda para sumir após 3000 ms (3 segundos)
-    lbl_mensagem.config(text="Operação realizada com sucesso!")
+    lbl_mensagem.config(text="Esse texto sumirá em 3s!")
     root.after(3000, apagar_label)
 
 root = tk.Tk()
@@ -19,7 +19,7 @@ root.geometry("400x200")
 btn_mostrar = tk.Button(root, text="Mostrar Mensagem", command=mostrar_mensagem)
 btn_mostrar.pack(pady=20)
 
-lbl_mensagem = tk.Label(root, text="", fg="green", font=("Arial", 12))
+lbl_mensagem = tk.Label(root, text="", fg="blue", bg= "orange", font=("Arial", 12, "bold"))
 lbl_mensagem.pack(pady=20)
 
 root.mainloop()
