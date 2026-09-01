@@ -15,7 +15,7 @@ def mostrar_estado():
         txt = "Unchecked"
     checkbox.config(text=f"Check me!({txt})")
 
-checkbox = tk.Checkbutton(root, text= "Check me! (Checked)", variable=checkbox_estado, command=mostrar_estado)
+checkbox = tk.Radiobutton(root, text= "Check me! (Checked)", variable=checkbox_estado, command=mostrar_estado)
 checkbox.deselect()
 checkbox.pack(expand=False)
 
