@@ -30,7 +30,8 @@ def limpar_modo():
         if nome in globals() and globals()[nome] is not None:
             try:
                 globals()[nome].destroy()
-            except Exception:
+            except Exception as e:
+                print(e)
                 pass
 
     canvas.delete("all")
@@ -40,14 +41,15 @@ def limpar_modo():
 
 def modo_cores():
     global faixa1, combobox_faixa_1, faixa2, combobox_faixa_2, multiplicador, combobox_multiplicador, tolerancia, combobox_tolerancia, btn_calcular, label_info
+    limpar_modo()
 
 
-    faixa1 = tk.Label(root, text="Faixa 1:", font=("Arial", 10,"bold"), bg="white")
+    faixa1 = tk.Label(root, text="Faixa 1:  ", font=("Arial", 10,"bold"), bg="white")
     faixa1.place(x= 30, y= 160)
     combobox_faixa_1 = ttk.Combobox(root, values = ["Preto (0)","Marrom (1)","Vermelho (2)","Laranja (3)","Amarelo (4)","Verde (5)","Azul (6)", "Violeta (7)","Cinza (8)", "Branco (9)"])
     combobox_faixa_1.place(x= 30, y= 190)
 
-    faixa2 = tk.Label(root, text="Faixa 2:", font=("Arial", 10,"bold"), bg="white")
+    faixa2 = tk.Label(root, text="Faixa 2:          ", font=("Arial", 10,"bold"), bg="white")
     faixa2.place(x=200, y= 160)
     combobox_faixa_2 = ttk.Combobox(root, values = ["Preto (0)","Marrom (1)","Vermelho (2)","Laranja (3)","Amarelo (4)","Verde (5)","Azul (6)", "Violeta (7)","Cinza (8)", "Branco (9)"])
     combobox_faixa_2.place(x= 200, y= 190)
@@ -75,6 +77,7 @@ def modo_cores():
 
 def modo_valor():
     global label_valor, entry_valor
+    limpar_modo()
 
     label_valor = tk.Label(root, text="Valor da resistência (Ω): ", font=("Arial", 10,"bold"), bg="white")
     label_valor.place(x= 30, y= 160)
@@ -104,8 +107,6 @@ info_valor = tk.Radiobutton(root, command=modo_valor, text="Informar por valor",
 info_valor.place(x= 30, y= 125)
 info_cores = tk.Radiobutton(root,command=modo_cores, text="Informar por cores", variable=Radiobutton_estado, value=2,bg="#c1cdcd")
 info_cores.place(x= 200, y= 125)
-
-
 
 
  
