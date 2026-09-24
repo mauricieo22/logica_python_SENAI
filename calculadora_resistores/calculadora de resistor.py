@@ -24,7 +24,7 @@ CORES = {
     "azul": "#1769C2",
     "violeta": "#8A2BE2",
     "cinza": "#808080",
-    "branco": "#F5F5F5",
+    "branco": "#FFFFFF",
     "dourado": "#D4AF37",
     "prata": "#C0C0C0"
 }
@@ -60,8 +60,7 @@ class Calculadora:
     def __init__(self, janela):
         self.janela = janela
         self.janela.title("Calculadora de Resistor")
-        self.janela.geometry("620x570")
-        self.janela.resizable(False, False)
+        self.janela.geometry("800x500")
         self.janela.configure(bg="#eef2f7")
 
         #modo inicial
@@ -77,63 +76,13 @@ class Calculadora:
         self.multiplicador = tk.StringVar(value="laranja")
         self.tolerancia_cores = tk.StringVar(value="violeta")
 
-        self.criar_estilo()
+    
         self.criar_interface()
 
         self.atualizar_modo()
 
 
-    def criar_estilo(self):
-        estilo = ttk.Style()
-        try:
-            estilo.theme_use("clam")
-        except tk.TclError:
-            pass
-
-        estilo.configure(
-            "TFrame",
-            background="#eef2f7"
-        )
-
-        estilo.configure(
-            "Painel.TFrame",
-            background="white"
-        )
-
-        estilo.configure(
-            "TLabel",
-            background="white",
-            foreground="#20252b",
-            font=("Arial", 10)
-        )
-
-        estilo.configure(
-            "Titulo.TLabel",
-            background="#eef2f7",
-            foreground="#24364b",
-            font=("Arial", 17, "bold")
-        )
-
-        estilo.configure(
-            "Subtitulo.TLabel",
-            background="white",
-            foreground="#222222",
-            font=("Arial", 10, "bold")
-        )
-
-        estilo.configure(
-            "Resultado.TLabel",
-            background="white",
-            foreground="#202020",
-            font=("Arial", 10, "bold")
-        )
-
-        estilo.configure(
-            "TButton",
-            font=("Arial", 9, "bold"),
-            padding=(10, 5)
-        )
-
+    
 
     def criar_interface(self):
         
@@ -251,10 +200,8 @@ class Calculadora:
         combo.grid(row=1, column=1, pady=(5, 0))
 
         ttk.Button(
-            self.area_controles,
-            text="Calcular cores",
-            command=self.calcular_valor
-        ).pack(anchor="w", pady=(10, 0))
+            self.area_controles,text="Calcular cores",command=self.calcular_valor
+).pack(anchor="w", pady=(10, 0))
 
     def criar_controles_cores(self):
         self.limpar_controles()
@@ -415,7 +362,7 @@ class Calculadora:
         else:
             return f"{valor:.2f} Ω"
 
-    #desenho
+    #DESENHO
     def desenhar_resistor(self):
         if not hasattr(self, "canvas"):
             return
@@ -435,7 +382,7 @@ class Calculadora:
         topo = centro_y - 32
         baixo = centro_y + 32
 
-        # Fios
+        # fios
         self.canvas.create_line(
             esquerda, centro_y,
             corpo_esq, centro_y,
@@ -450,7 +397,7 @@ class Calculadora:
             width=5
         )
 
-        # Corpo do resistor
+        #corpo do resistor
         self.canvas.create_rectangle(
             corpo_esq,
             topo,
@@ -461,7 +408,7 @@ class Calculadora:
             width=2
         )
 
-        # Descobrir as cores atuais
+        #descobrir as cores atuais
         if self.modo.get() == "valor":
             nomes = [
                 self.banda1.get(),
@@ -479,7 +426,7 @@ class Calculadora:
 
         cores = [CORES[nome] for nome in nomes]
 
-        # Faixas
+        # faixas
         largura_corpo = corpo_dir - corpo_esq
         posicoes = [
             corpo_esq + largura_corpo * 0.25,

@@ -1,10 +1,11 @@
 import tkinter as tk
-from tkinter import ttk,Canvas
+from tkinter import ttk,Canvas,messagebox,janela
 
-root = tk.Tk()
-root.title("Calculadora de resistor")
-root.geometry("800x500")
-root.config(bg="white")
+
+
+
+
+
 
 canvas = Canvas(root, width=800, height= 500 , bg="#c1cdcd")
 

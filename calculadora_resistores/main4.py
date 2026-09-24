@@ -29,18 +29,18 @@ info_ask.place(x=30, y=90)
 
 
 cores_resistor = {
-    "Preto": "black",
-    "Marrom": "brown",
-    "Vermelho": "red",
-    "Laranja": "orange",
-    "Amarelo": "yellow",
-    "Verde": "green",
-    "Azul": "blue",
-    "Violeta": "purple",
-    "Cinza": "gray",
-    "Branco": "white",
-    "Ouro": "gold",
-    "Prata": "silver"
+    "Preto": "#000000",
+    "Marrom": "#852600",
+    "Vermelho": "#f00505",
+    "Laranja": "#f88d00",
+    "Amarelo": "#fae100",
+    "Verde": "#10bb00",
+    "Azul": "#077bff",
+    "Violeta": "#b105f5",
+    "Cinza": "#4D4A4A",
+    "Branco": "#ffffff",
+    "Ouro": "#d8ce3e",
+    "Prata": "#A8A8A8"
 }
 
 
@@ -55,7 +55,7 @@ def obter_cor(valor):
 def desenhar_resistor():
     canvas.delete("resistor")
 
-    # Área inferior
+    #parte de baixo
     canvas.create_rectangle(
         30, 295, 770, 470,
         fill="#c1cdcd",
@@ -63,7 +63,7 @@ def desenhar_resistor():
         tags="resistor"
     )
 
-    # Fios
+    #fios
     canvas.create_line(
         150, 380, 270, 380,
         fill="black",
@@ -77,7 +77,7 @@ def desenhar_resistor():
         tags="resistor"
     )
 
-    # Corpo do resistor
+    #corpo do resistor
     canvas.create_rectangle(
         270, 340, 530, 420,
         fill="#deb887",
@@ -86,7 +86,7 @@ def desenhar_resistor():
         tags="resistor"
     )
 
-    # Faixas
+    #faixas
     faixas = [
         (320, "combobox_faixa_1"),
         (370, "combobox_faixa_2"),
@@ -132,7 +132,7 @@ def limpar_modo():
         "entry_valor",
         "label_tolerancia",
         "combobox_tolerancia_valor",
-        "btn_calcular",
+        "botao_calcular",
         "label_info"
     ]
 
@@ -168,7 +168,7 @@ def modo_cores():
     global combobox_multiplicador
     global tolerancia
     global combobox_tolerancia
-    global btn_calcular
+    global botao_calcular
     global label_info
 
     limpar_modo()
@@ -259,14 +259,14 @@ def modo_cores():
     ]:
         combobox.bind("<<ComboboxSelected>>", atualizar_resistor)
 
-    btn_calcular = tk.Button(
+    botao_calcular = tk.Button(
         root,
         text="Calcular resistência",
         font=("Arial", 14, "bold"),
         fg="black",
         bg="#7fffd4"
     )
-    btn_calcular.place(x=30, y=230)
+    botao_calcular.place(x=30, y=230)
 
     label_info = tk.Label(
         root,
@@ -294,6 +294,13 @@ def modo_valor():
 
     entry_valor = tk.Entry(root)
     entry_valor.place(x=30, y=190)
+
+    label_tolerancia = tk.Label(root, text="Tolerância:", font=("Arial", 10,"bold"), bg="white")
+    label_tolerancia.place(x=200, y= 160)
+    combobox_faixa_2 = ttk.Combobox(root, values = ["Prata (0.01Ω)","Ouro (0.1Ω)","Preto (1Ω)","Marrom (10Ω)","Vermelho (100Ω)","Laranja (1000Ω)","Amarelo (10000Ω)","Verde (100000Ω)","Azul (1000000Ω)", "Violeta (10000000Ω)"])
+    combobox_faixa_2.place(x= 200, y= 190)
+    
+
 
 
 Radiobutton_estado = tk.IntVar()
