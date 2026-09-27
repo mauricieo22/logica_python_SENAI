@@ -1,530 +1,460 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox, simpledialog
+import json
+import os
 
-DIGITOS = {
-    "preto": 0,
-    "marrom": 1,
-    "vermelho": 2,
-    "laranja": 3,
-    "amarelo": 4,
-    "verde": 5,
-    "azul": 6,
-    "violeta": 7,
-    "cinza": 8,
-    "branco": 9
-}
+ARQUIVO = "contas.json"
 
-CORES = {
-    "preto": "#000000",
-    "marrom": "#8B4513",
-    "vermelho": "#F01818",
-    "laranja": "#F28C00",
-    "amarelo": "#F5D000",
-    "verde": "#229447",
-    "azul": "#1769C2",
-    "violeta": "#8A2BE2",
-    "cinza": "#808080",
-    "branco": "#F5F5F5",
-    "dourado": "#D4AF37",
-    "prata": "#C0C0C0"
-}
+#DADOS
+if os.path.exists(ARQUIVO):
+    with open(ARQUIVO, "r", encoding="utf-8") as arquivo:
+        contas = json.load(arquivo)
+else:
+    contas = {}
 
-MULTIPLICADORES = {
-    "prata": 0.01,
-    "dourado": 0.1,
-    "preto": 1,
-    "marrom": 10,
-    "vermelho": 100,
-    "laranja": 1000,
-    "amarelo": 10000,
-    "verde": 100000,
-    "azul": 1000000,
-    "violeta": 10000000,
-    "cinza": 100000000,
-    "branco": 1000000000
-}
+conta_atual = ""
+saldo = 0
 
-TOLERANCIAS = {
-    "marrom": ("±1%", 1),
-    "vermelho": ("±2%", 2),
-    "verde": ("±0,5%", 0.5),
-    "azul": ("±0,25%", 0.25),
-    "violeta": ("±0,1%", 0.1),
-    "cinza": ("±0,05%", 0.05),
-    "dourado": ("±5%", 5),
-    "prata": ("±10%", 10)
-}
+AZUL = "#0878A8"
+AZUL_ESCURO = "#07578A"
+AZUL_BOTAO = "#F2F6F7"
+LARANJA = "#F6A800"
+BRANCO = "#FFFFFF"
+CINZA = "#DCECEF"
 
 
-class Calculadora:
-    def __init__(self, janela):
-        self.janela = janela
-        self.janela.title("Calculadora de Resistor")
-        self.janela.geometry("620x570")
-        self.janela.resizable(False, False)
-        self.janela.configure(bg="#eef2f7")
-
-        #modo inicial
-        self.modo = tk.StringVar(value="valor")
-
-        #variáveis do modo valor -> cores
-        self.valor = tk.StringVar()
-        self.tolerancia_valor = tk.StringVar(value="dourado")
-
-        # variáveis do modo cores -> valor
-        self.banda1 = tk.StringVar(value="vermelho")
-        self.banda2 = tk.StringVar(value="vermelho")
-        self.multiplicador = tk.StringVar(value="laranja")
-        self.tolerancia_cores = tk.StringVar(value="violeta")
-
-        self.criar_estilo()
-        self.criar_interface()
-
-        self.atualizar_modo()
+def salvar():
+    with open(ARQUIVO, "w", encoding="utf-8") as arquivo:
+        json.dump(contas, arquivo, indent=4)
 
 
-    def criar_estilo(self):
-        estilo = ttk.Style()
-        try:
-            estilo.theme_use("clam")
-        except tk.TclError:
-            pass
+#JANELA
+janela = tk.Tk()
+janela.title("Caixa Eletrônico")
+janela.geometry("900x600")
+janela.resizable(False, False)
 
-        estilo.configure(
-            "TFrame",
-            background="#eef2f7"
+canvas = tk.Canvas(
+    janela,
+    width=900,
+    height=600,
+    bg=AZUL,
+    highlightthickness=0
+)
+canvas.pack()
+
+
+def limpar():
+    canvas.delete("all")
+
+
+def seta(x, y, lado="esquerda"):
+    """Desenha uma seta simples."""
+    if lado == "esquerda":
+        pontos = [x + 18, y, x, y + 15, x + 18, y + 30]
+    else:
+        pontos = [x, y, x + 18, y + 15, x, y + 30]
+
+    canvas.create_polygon(
+        pontos,
+        fill=AZUL_ESCURO,
+        outline=AZUL_ESCURO
+    )
+
+
+def botao(texto, x, y, comando, lado="esquerda", destaque=False):
+    largura = 370
+    altura = 58
+
+    #borda laranja quando selecionado
+    if destaque:
+        canvas.create_rectangle(
+            x - 4, y - 4,
+            x + largura + 4, y + altura + 4,
+            fill=LARANJA,
+            outline=LARANJA
         )
 
-        estilo.configure(
-            "Painel.TFrame",
-            background="white"
+    canvas.create_rectangle(
+        x, y,
+        x + largura, y + altura,
+        fill=AZUL_BOTAO,
+        outline=AZUL_BOTAO
+    )
+
+    if lado == "esquerda":
+        seta(x + 15, y + 14, "esquerda")
+        canvas.create_text(
+            x + 48, y + 29,
+            text=texto,
+            anchor="w",
+            fill=AZUL_ESCURO,
+            font=("Arial", 15, "bold")
+        )
+    else:
+        seta(x + largura - 33, y + 14, "direita")
+        canvas.create_text(
+            x + largura - 48, y + 29,
+            text=texto,
+            anchor="e",
+            fill=AZUL_ESCURO,
+            font=("Arial", 15, "bold")
         )
 
-        estilo.configure(
-            "TLabel",
-            background="white",
-            foreground="#20252b",
-            font=("Arial", 10)
+    #área clicável
+    tag = "botao_" + texto.replace(" ", "_")
+    canvas.create_rectangle(
+        x, y,
+        x + largura, y + altura,
+        fill="",
+        outline="",
+        tags=(tag,)
+    )
+
+    canvas.tag_bind(
+        tag,
+        "<Button-1>",
+        lambda evento: comando()
+    )
+
+    canvas.tag_bind(
+        tag,
+        "<Enter>",
+        lambda evento: canvas.config(cursor="hand2")
+    )
+
+    canvas.tag_bind(
+        tag,
+        "<Leave>",
+        lambda evento: canvas.config(cursor="")
+    )
+
+
+#MENU
+def mostrar_menu():
+    limpar()
+
+    #fundo com detalhes decorativos
+    canvas.create_polygon(
+        0, 0, 180, 0, 0, 180,
+        fill="#096C99",
+        outline=""
+    )
+
+    canvas.create_polygon(
+        0, 600, 190, 600, 0, 410,
+        fill=LARANJA,
+        outline=""
+    )
+
+    canvas.create_polygon(
+        900, 600, 700, 600, 900, 400,
+        fill="#0A6B94",
+        outline=""
+    )
+
+    #título
+    canvas.create_text(
+        450, 35,
+        text="Use os botões abaixo da tela",
+        fill=BRANCO,
+        font=("Arial", 22, "bold")
+    )
+
+    #informação da conta
+    canvas.create_text(
+        450, 75,
+        text=f"Conta: {conta_atual}   |   Saldo: R$ {saldo},00",
+        fill=BRANCO,
+        font=("Arial", 13, "bold")
+    )
+
+    #botões no mesmo estilo da imagem
+    botao(
+        "CONSULTAR SALDO",
+        45, 120,
+        consultar,
+        "esquerda"
+    )
+
+    botao(
+        "SACAR",
+        485, 120,
+        sacar,
+        "direita"
+    )
+
+    botao(
+        "DEPOSITAR",
+        45, 205,
+        depositar,
+        "esquerda"
+    )
+
+    botao(
+        "SAIR",
+        485, 205,
+        sair,
+        "direita"
+    )
+
+    #area de informaçoes
+    canvas.create_rectangle(
+        45, 310, 855, 500,
+        fill="#EAF1F3",
+        outline="#EAF1F3"
+    )
+
+    canvas.create_text(
+        450, 350,
+        text="CAIXA ELETRÔNICO",
+        fill=AZUL_ESCURO,
+        font=("Arial", 24, "bold")
+    )
+
+    canvas.create_text(
+        450, 395,
+        text="Escolha uma das opções acima",
+        fill=AZUL_ESCURO,
+        font=("Arial", 17)
+    )
+
+    canvas.create_text(
+        450, 435,
+        text="Use os botões para realizar suas operações.",
+        fill=AZUL_ESCURO,
+        font=("Arial", 14)
+    )
+
+    canvas.create_text(
+        450, 475,
+        text="Saldo inicial de uma conta nova: R$ 1.000,00",
+        fill=AZUL_ESCURO,
+        font=("Arial", 13)
+    )
+
+
+#operações
+def consultar():
+    messagebox.showinfo(
+        "SALDO E EXTRATO",
+        f"Seu saldo atual é:\n\nR$ {saldo},00"
+    )
+
+
+def depositar():
+    global saldo
+
+    valor = simpledialog.askstring(
+        "DEPOSITAR",
+        "Digite o valor inteiro para depósito:",
+        parent=janela
+    )
+
+    if valor is None:
+        return
+
+    if not valor.isdigit() or int(valor) <= 0:
+        messagebox.showerror(
+            "ERRO",
+            "Digite somente um valor inteiro positivo."
         )
+        return
 
-        estilo.configure(
-            "Titulo.TLabel",
-            background="#eef2f7",
-            foreground="#24364b",
-            font=("Arial", 17, "bold")
+    valor = int(valor)
+    saldo += valor
+
+    contas[conta_atual]["saldo"] = saldo
+    salvar()
+    mostrar_menu()
+
+    messagebox.showinfo(
+        "DEPÓSITO",
+        f"Depósito realizado com sucesso!\n\n"
+        f"Saldo atual: R$ {saldo},00"
+    )
+
+
+def sacar():
+    global saldo
+
+    valor = simpledialog.askstring(
+        "SAQUE",
+        "Digite o valor inteiro para saque:",
+        parent=janela
+    )
+
+    if valor is None:
+        return
+
+    if not valor.isdigit() or int(valor) <= 0:
+        messagebox.showerror(
+            "ERRO",
+            "Digite somente um valor inteiro positivo."
         )
+        return
 
-        estilo.configure(
-            "Subtitulo.TLabel",
-            background="white",
-            foreground="#222222",
-            font=("Arial", 10, "bold")
+    valor = int(valor)
+
+    if valor > saldo:
+        messagebox.showerror(
+            "ERRO",
+            "Saldo insuficiente."
         )
-
-        estilo.configure(
-            "Resultado.TLabel",
-            background="white",
-            foreground="#202020",
-            font=("Arial", 10, "bold")
-        )
-
-        estilo.configure(
-            "TButton",
-            font=("Arial", 9, "bold"),
-            padding=(10, 5)
-        )
-
-
-    def criar_interface(self):
-        
-        #título
-        ttk.Label(
-            self.janela,
-            text="Calculadora de Resistor",
-            style="Titulo.TLabel"
-        ).pack(anchor="w", padx=18, pady=(18, 10))
-
-        # painel principal
-        self.painel = ttk.Frame(
-            self.janela,
-            style="Painel.TFrame",
-            padding=15
-        )
-        self.painel.pack(fill="both", expand=True, padx=14, pady=(0, 15))
-
-        #selecionar do modo
-        ttk.Label(
-            self.painel,
-            text="Como deseja informar o resistor?",
-            style="Subtitulo.TLabel"
-        ).pack(anchor="w", pady=(0, 8))
-
-        frame_radio = ttk.Frame(self.painel, style="Painel.TFrame")
-        frame_radio.pack(anchor="w")
-
-        ttk.Radiobutton(
-            frame_radio,
-            text="Valor da resistência",
-            variable=self.modo,
-            value="valor",
-            command=self.atualizar_modo
-        ).pack(side="left", padx=(0, 16))
-
-        ttk.Radiobutton(
-            frame_radio,
-            text="Cores do resistor",
-            variable=self.modo,
-            value="cores",
-            command=self.atualizar_modo
-        ).pack(side="left")
-
-        # área que muda de dependendo do modo escolhid
-        self.area_controles = ttk.Frame(
-            self.painel,
-            style="Painel.TFrame"
-        )
-        self.area_controles.pack(fill="x", pady=(13, 8))
-
-        #resultado calcular
-        self.resultado = ttk.Label(
-            self.painel,
-            text="Digite o valor da resistência ou selecione as cores.",
-            style="Resultado.TLabel"
-        )
-        self.resultado.pack(anchor="w", pady=(4, 10))
-
-        #canvas
-        self.canvas = tk.Canvas(
-            self.painel,
-            width=575,
-            height=205,
-            bg="#fbfcfe",
-            highlightbackground="#d7dce2",
-            highlightthickness=1
-        )
-        self.canvas.pack(fill="x")
-
-        self.canvas.bind(
-            "<Configure>",
-            lambda event: self.desenhar_resistor()
-        )
-
-    #controles
-    def limpar_controles(self):
-        for widget in self.area_controles.winfo_children():
-            widget.destroy()
-
-    def criar_controles_valor(self):
-        self.limpar_controles()
-
-        linha = ttk.Frame(
-            self.area_controles,
-            style="Painel.TFrame"
-        )
-        linha.pack(anchor="w")
-
-        ttk.Label(
-            linha,
-            text="Valor da resistência (Ω):"
-        ).grid(row=0, column=0, sticky="w", padx=(0, 22))
-
-        ttk.Label(
-            linha,
-            text="Tolerância:"
-        ).grid(row=0, column=1, sticky="w")
-
-        entrada = ttk.Entry(
-            linha,
-            textvariable=self.valor,
-            width=18
-        )
-        entrada.grid(row=1, column=0, padx=(0, 22), pady=(5, 0))
-        entrada.focus_set()
-
-        combo = ttk.Combobox(
-            linha,
-            textvariable=self.tolerancia_valor,
-            values=list(TOLERANCIAS.keys()),
-            state="readonly",
-            width=14
-        )
-        combo.grid(row=1, column=1, pady=(5, 0))
-
-        ttk.Button(
-            self.area_controles,
-            text="Calcular cores",
-            command=self.calcular_valor
-        ).pack(anchor="w", pady=(10, 0))
-
-    def criar_controles_cores(self):
-        self.limpar_controles()
-
-        linha = ttk.Frame(
-            self.area_controles,
-            style="Painel.TFrame"
-        )
-        linha.pack(fill="x")
-
-        dados = [
-            ("Banda 1:", self.banda1, list(DIGITOS.keys())),
-            ("Banda 2:", self.banda2, list(DIGITOS.keys())),
-            ("Multiplicador:", self.multiplicador,
-             list(MULTIPLICADORES.keys())),
-            ("Tolerância:", self.tolerancia_cores,
-             list(TOLERANCIAS.keys()))
-        ]
-
-        for coluna, (texto, variavel, valores) in enumerate(dados):
-            ttk.Label(
-                linha,
-                text=texto
-            ).grid(
-                row=0,
-                column=coluna,
-                sticky="w",
-                padx=(0 if coluna == 0 else 10, 6)
-            )
-
-            combo = ttk.Combobox(
-                linha,
-                textvariable=variavel,
-                values=valores,
-                state="readonly",
-                width=13
-            )
-            combo.grid(
-                row=1,
-                column=coluna,
-                sticky="w",
-                padx=(0 if coluna == 0 else 10, 6),
-                pady=(5, 0)
-            )
-
-        ttk.Button(
-            self.area_controles,
-            text="Calcular resistência",
-            command=self.calcular_cores
-        ).pack(anchor="w", pady=(10, 0))
-
-#atualizar modo
-
-    def atualizar_modo(self):
-        if self.modo.get() == "valor":
-            self.criar_controles_valor()
-            self.resultado.config(
-                text="Digite o valor da resistência ou selecione as cores."
-            )
-        else:
-            self.criar_controles_cores()
-            self.resultado.config(
-                text="Selecione as quatro faixas do resistor."
-            )
-
-        self.desenhar_resistor()
-
-
-    # modo valor
-    def calcular_valor(self):
-        texto = self.valor.get().strip().replace(",", ".")
-
-        try:
-            valor = float(texto)
-        except ValueError:
-            messagebox.showwarning(
-                "Valor inválido",
-                "Digite um valor numérico, por exemplo: 3300"
-            )
-            return
-
-        if valor <= 0:
-            messagebox.showwarning(
-                "Valor inválido",
-                "O valor da resistência deve ser maior que zero."
-            )
-            return
-
-        resultado = self.encontrar_faixas(valor)
-
-        if resultado is None:
-            messagebox.showwarning(
-                "Valor não representável",
-                "Esse valor não pode ser representado exatamente "
-                "com um resistor de 4 faixas."
-            )
-            return
-
-        d1, d2, multiplicador = resultado
-
-        self.banda1.set(d1)
-        self.banda2.set(d2)
-        self.multiplicador.set(multiplicador)
-
-        tolerancia = self.tolerancia_valor.get()
-        texto_tol = TOLERANCIAS[tolerancia][0]
-
-        self.resultado.config(
-            text=f"Resistência: {self.formatar(valor)} {texto_tol}"
-        )
-
-        self.desenhar_resistor()
-
-    def encontrar_faixas(self, valor):
-        for nome, fator in MULTIPLICADORES.items():
-            base = valor / fator
-
-            if 10 <= base <= 99:
-                inteiro = round(base)
-
-                if abs(base - inteiro) < 0.000001:
-                    primeiro = inteiro // 10
-                    segundo = inteiro % 10
-
-                    if (
-                        primeiro in range(10)
-                        and segundo in range(10)
-                    ):
-                        nome1 = list(DIGITOS.keys())[primeiro]
-                        nome2 = list(DIGITOS.keys())[segundo]
-                        return nome1, nome2, nome
-
-        return None
-
-
-    # modo cores
-    def calcular_cores(self):
-        d1 = DIGITOS[self.banda1.get()]
-        d2 = DIGITOS[self.banda2.get()]
-        fator = MULTIPLICADORES[self.multiplicador.get()]
-
-        valor = (d1 * 10 + d2) * fator
-        tolerancia = TOLERANCIAS[self.tolerancia_cores.get()][0]
-
-        self.resultado.config(
-            text=f"Resistência: {self.formatar(valor)} {tolerancia}"
-        )
-
-        self.desenhar_resistor()
-
-
-    # formatação
-    def formatar(self, valor):
-        if valor >= 1_000_000:
-            return f"{valor / 1_000_000:.2f} MΩ"
-        elif valor >= 1_000:
-            return f"{valor / 1_000:.2f} kΩ"
-        else:
-            return f"{valor:.2f} Ω"
-
-    #desenho
-    def desenhar_resistor(self):
-        if not hasattr(self, "canvas"):
-            return
-
-        self.canvas.delete("all")
-
-        largura = max(self.canvas.winfo_width(), 500)
-        altura = max(self.canvas.winfo_height(), 180)
-
-        centro_y = altura // 2
-
-        esquerda = 35
-        direita = largura - 35
-
-        corpo_esq = esquerda + 55
-        corpo_dir = direita - 55
-        topo = centro_y - 32
-        baixo = centro_y + 32
-
-        # Fios
-        self.canvas.create_line(
-            esquerda, centro_y,
-            corpo_esq, centro_y,
-            fill="#777777",
-            width=5
-        )
-
-        self.canvas.create_line(
-            corpo_dir, centro_y,
-            direita, centro_y,
-            fill="#777777",
-            width=5
-        )
-
-        # Corpo do resistor
-        self.canvas.create_rectangle(
-            corpo_esq,
-            topo,
-            corpo_dir,
-            baixo,
-            fill="#f4e5b8",
-            outline="#725a31",
-            width=2
-        )
-
-        # Descobrir as cores atuais
-        if self.modo.get() == "valor":
-            nomes = [
-                self.banda1.get(),
-                self.banda2.get(),
-                self.multiplicador.get(),
-                self.tolerancia_valor.get()
-            ]
-        else:
-            nomes = [
-                self.banda1.get(),
-                self.banda2.get(),
-                self.multiplicador.get(),
-                self.tolerancia_cores.get()
-            ]
-
-        cores = [CORES[nome] for nome in nomes]
-
-        # Faixas
-        largura_corpo = corpo_dir - corpo_esq
-        posicoes = [
-            corpo_esq + largura_corpo * 0.25,
-            corpo_esq + largura_corpo * 0.39,
-            corpo_esq + largura_corpo * 0.53,
-            corpo_esq + largura_corpo * 0.67
-        ]
-
-        for i, (x, cor) in enumerate(zip(posicoes, cores)):
-            largura_faixa = 17 if i < 3 else 13
-
-            self.canvas.create_rectangle(
-                x - largura_faixa / 2,
-                topo,
-                x + largura_faixa / 2,
-                baixo,
-                fill=cor,
-                outline="#555555",
-                width=1
-            )
-
-        #titulo do desenho
-        self.canvas.create_text(
-            largura / 2,
-            20,
-            text="Resistor de 4 faixas",
-            font=("Arial", 12, "bold"),
-            fill="#222222"
-        )
-
-        #nomes das cores  abaixo
-        nomes_texto = "    ".join(
-            nome.capitalize() for nome in nomes
-        )
-
-        self.canvas.create_text(
-            largura / 2,
-            baixo + 30,
-            text=nomes_texto,
-            font=("Arial", 9),
-            fill="#444444"
-        )
-
-
-if __name__ == "__main__":
-    janela = tk.Tk()
-    app = Calculadora(janela)
-    janela.mainloop()
+        return
+
+    #calcula as cédulas
+    restante = valor
+    cedulas = [100, 50, 20, 10, 5, 2, 1]
+    texto = ""
+
+    for cedula in cedulas:
+        quantidade = restante // cedula
+
+        if quantidade > 0:
+            texto += f"{quantidade} cédula(s) de R$ {cedula}\n"
+            restante %= cedula
+
+    saldo -= valor
+    contas[conta_atual]["saldo"] = saldo
+    salvar()
+    mostrar_menu()
+
+    messagebox.showinfo(
+        "SAQUE REALIZADO",
+        f"Saque realizado com sucesso!\n\n"
+        f"Entregar:\n{texto}\n"
+        f"Saldo atual: R$ {saldo},00"
+    )
+
+
+def sair():
+    salvar()
+    janela.destroy()
+
+
+#login
+def login():
+    global conta_atual, saldo
+
+    conta = simpledialog.askstring(
+        "CONTA",
+        "Digite sua conta:",
+        parent=janela
+    )
+
+    if not conta:
+        return
+
+    senha = simpledialog.askstring(
+        "SENHA",
+        "Digite sua senha:",
+        show="*",
+        parent=janela
+    )
+
+    if not senha:
+        return
+
+    #conta nova. Começa com R$ 1.000,00
+    if conta not in contas:
+        contas[conta] = {
+            "senha": senha,
+            "saldo": 1000
+        }
+        salvar()
+
+    conta_atual = conta
+    saldo = contas[conta]["saldo"]
+
+    mostrar_menu()
+
+
+#tela inicial
+def tela_inicial():
+    limpar()
+
+    canvas.create_polygon(
+        0, 0, 180, 0, 0, 180,
+        fill="#096C99",
+        outline=""
+    )
+
+    canvas.create_polygon(
+        0, 600, 190, 600, 0, 410,
+        fill=LARANJA,
+        outline=""
+    )
+
+    canvas.create_text(
+        450, 80,
+        text="CAIXA ELETRÔNICO",
+        fill=BRANCO,
+        font=("Arial", 32, "bold")
+    )
+
+    canvas.create_text(
+        450, 125,
+        text="Use os botões para acessar sua conta",
+        fill=BRANCO,
+        font=("Arial", 17)
+    )
+
+    canvas.create_rectangle(
+        150, 180, 750, 500,
+        fill="#EAF1F3",
+        outline="#EAF1F3"
+    )
+
+    canvas.create_text(
+        450, 225,
+        text="BEM-VINDO",
+        fill=AZUL_ESCURO,
+        font=("Arial", 26, "bold")
+    )
+
+    # Botão entrar
+    canvas.create_rectangle(
+        270, 290, 630, 350,
+        fill=AZUL_ESCURO,
+        outline=AZUL_ESCURO
+    )
+
+    canvas.create_text(
+        450, 320,
+        text="ENTRAR",
+        fill=BRANCO,
+        font=("Arial", 30, "bold")
+    )
+
+    canvas.create_rectangle(
+        270, 290, 630, 350,
+        fill="",
+        outline="",
+        tags=("entrar",)
+    )
+
+    canvas.tag_bind(
+        "entrar",
+        "<Button-1>",
+        lambda evento: login()
+    )
+
+    canvas.tag_bind(
+        "entrar",
+        "<Enter>",
+        lambda evento: canvas.config(cursor="hand2")
+    )
+
+    canvas.tag_bind(
+        "entrar",
+        "<Leave>",
+        lambda evento: canvas.config(cursor="")
+    )
+
+
+
+tela_inicial()
+
+janela.protocol("WM_DELETE_WINDOW", sair)
+janela.mainloop()
