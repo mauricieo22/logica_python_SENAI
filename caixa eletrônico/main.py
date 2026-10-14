@@ -43,7 +43,7 @@ def login():
             print("Senha incorreta.")
             return False
 
-    #criar nova connta
+    #criar nova conta
     contas[conta] = {
         "senha": senha,
         "saldo": 1000.00
@@ -56,11 +56,11 @@ def login():
     print("Saldo inicial: R$ 1.000,00")
     return True
 
-#1- consultar saldo saldo da conta
+#1 - consultar saldo
 def consultar():
     print(f"Saldo: R$ {contas[conta_atual]['saldo']:.2f}")
 
-#2 - depositar
+#2- depositar
 def depositar():
     valor = float(input("Valor do depósito: R$ "))
 
@@ -72,7 +72,7 @@ def depositar():
         print("Depósito realizado!")
         consultar()
 
-#3 - sacar
+#3- sacar
 def sacar():
     valor = float(input("Valor do saque: R$ "))
 
@@ -88,7 +88,7 @@ def sacar():
         salvar()
 
         print("Saque realizado!")
-        for cedula in [200, 100, 50, 20, 10, 5, 2, 1]:
+        for cedula in [100, 50, 20, 10, 5, 2, 1]:
             quantidade = restante // cedula
             if quantidade > 0:
                 print(f"{quantidade} cédula(s) de R$ {cedula}")
@@ -97,7 +97,7 @@ def sacar():
         consultar()
 
 
-#progrma principal
+# programa principal
 while True:
     print("\n -- CAIXA ELETRÔNICO -- ")
 
