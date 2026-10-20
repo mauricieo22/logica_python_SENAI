@@ -1,0 +1,16 @@
+[
+{
+"id": 1,
+"descricao": "Salário",
+"valor": 2500.00,
+"tipo": "Receita",
+"data": "30/09/2026 20:44"
+},
+{
+"id": 2,
+"descricao": "Mercado",
+"valor": 350.00,
+"tipo": "Despesa",
+"data": "01/10/2026 09:15"
+}
+]

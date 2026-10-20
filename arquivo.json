@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "descricao": "Gasolina",
+        "valor": 100.0,
+        "tipo": "Receita",
+        "data": "19/10/2026 21:12"
+    },
+    {
+        "id": 2,
+        "descricao": "Gasolina",
+        "valor": 100.0,
+        "tipo": "Despesa",
+        "data": "19/10/2026 21:22"
+    },
+    {
+        "id": 3,
+        "descricao": "Gasolina",
+        "valor": 100.0,
+        "tipo": "Despesa",
+        "data": "18/10/2026 21:33"
+    }
+]
