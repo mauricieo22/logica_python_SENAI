@@ -1,0 +1,9 @@
+[
+    {
+        "id": 2,
+        "descricao": "Salário",
+        "valor": 3000.0,
+        "tipo": "Receita",
+        "data": "22/10/2026 08:00"
+    }
+]

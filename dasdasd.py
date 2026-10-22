@@ -1,460 +1,166 @@
-import tkinter as tk
-from tkinter import messagebox, simpledialog
 import json
 import os
+import tkinter as tk
+from datetime import datetime
+from tkinter import messagebox
 
-ARQUIVO = "contas.json"
 
-#DADOS
-if os.path.exists(ARQUIVO):
+ARQUIVO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "movimentacoes.json")
+
+
+def carregar_dados():
+    if not os.path.exists(ARQUIVO):
+        return []
     with open(ARQUIVO, "r", encoding="utf-8") as arquivo:
-        contas = json.load(arquivo)
-else:
-    contas = {}
-
-conta_atual = ""
-saldo = 0
-
-AZUL = "#0878A8"
-AZUL_ESCURO = "#07578A"
-AZUL_BOTAO = "#F2F6F7"
-LARANJA = "#F6A800"
-BRANCO = "#FFFFFF"
-CINZA = "#DCECEF"
+        return json.load(arquivo)
 
 
-def salvar():
+def salvar_dados():
     with open(ARQUIVO, "w", encoding="utf-8") as arquivo:
-        json.dump(contas, arquivo, indent=4)
+        json.dump(movimentacoes, arquivo, indent=4, ensure_ascii=False)
 
 
-#JANELA
-janela = tk.Tk()
-janela.title("Caixa Eletrônico")
-janela.geometry("900x600")
-janela.resizable(False, False)
+def atualizar_tela():
+    lista.delete(0, tk.END)
+    for item in sorted(movimentacoes, key=lambda item: item["id"]):
+        lista.insert(
+            tk.END,
+            f"{item['id']} | {item['data']} | {item['tipo']} | "
+            f"R$ {item['valor']:.2f} | {item['descricao']}",
+        )
 
-canvas = tk.Canvas(
-    janela,
-    width=900,
-    height=600,
-    bg=AZUL,
-    highlightthickness=0
-)
-canvas.pack()
-
-
-def limpar():
-    canvas.delete("all")
+    receitas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Receita")
+    despesas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Despesa")
+    saldo.config(
+        text=f"Receitas: R$ {receitas:.2f}   "
+        f"Despesas: R$ {despesas:.2f}   Saldo: R$ {receitas - despesas:.2f}"
+    )
 
 
-def seta(x, y, lado="esquerda"):
-    """Desenha uma seta simples."""
-    if lado == "esquerda":
-        pontos = [x + 18, y, x, y + 15, x + 18, y + 30]
+def adicionar_movimentacao(tipo):
+    descricao = campo_descricao.get().strip()
+    if not descricao:
+        messagebox.showerror("Erro", "Informe a descrição.")
+        return
+
+    try:
+        valor = float(campo_valor.get().replace(",", "."))
+        if valor <= 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Erro", "Informe um valor maior que zero.")
+        return
+
+    data = campo_data.get().strip()
+    if data:
+        try:
+            data = datetime.strptime(data, "%d/%m/%Y %H:%M").strftime("%d/%m/%Y %H:%M")
+        except ValueError:
+            messagebox.showerror("Erro", "Use a data no formato dd/mm/aaaa HH:MM.")
+            return
     else:
-        pontos = [x, y, x + 18, y + 15, x, y + 30]
+        data = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-    canvas.create_polygon(
-        pontos,
-        fill=AZUL_ESCURO,
-        outline=AZUL_ESCURO
-    )
-
-
-def botao(texto, x, y, comando, lado="esquerda", destaque=False):
-    largura = 370
-    altura = 58
-
-    #borda laranja quando selecionado
-    if destaque:
-        canvas.create_rectangle(
-            x - 4, y - 4,
-            x + largura + 4, y + altura + 4,
-            fill=LARANJA,
-            outline=LARANJA
-        )
-
-    canvas.create_rectangle(
-        x, y,
-        x + largura, y + altura,
-        fill=AZUL_BOTAO,
-        outline=AZUL_BOTAO
-    )
-
-    if lado == "esquerda":
-        seta(x + 15, y + 14, "esquerda")
-        canvas.create_text(
-            x + 48, y + 29,
-            text=texto,
-            anchor="w",
-            fill=AZUL_ESCURO,
-            font=("Arial", 15, "bold")
-        )
-    else:
-        seta(x + largura - 33, y + 14, "direita")
-        canvas.create_text(
-            x + largura - 48, y + 29,
-            text=texto,
-            anchor="e",
-            fill=AZUL_ESCURO,
-            font=("Arial", 15, "bold")
-        )
-
-    #área clicável
-    tag = "botao_" + texto.replace(" ", "_")
-    canvas.create_rectangle(
-        x, y,
-        x + largura, y + altura,
-        fill="",
-        outline="",
-        tags=(tag,)
-    )
-
-    canvas.tag_bind(
-        tag,
-        "<Button-1>",
-        lambda evento: comando()
-    )
-
-    canvas.tag_bind(
-        tag,
-        "<Enter>",
-        lambda evento: canvas.config(cursor="hand2")
-    )
-
-    canvas.tag_bind(
-        tag,
-        "<Leave>",
-        lambda evento: canvas.config(cursor="")
-    )
-
-
-#MENU
-def mostrar_menu():
-    limpar()
-
-    #fundo com detalhes decorativos
-    canvas.create_polygon(
-        0, 0, 180, 0, 0, 180,
-        fill="#096C99",
-        outline=""
-    )
-
-    canvas.create_polygon(
-        0, 600, 190, 600, 0, 410,
-        fill=LARANJA,
-        outline=""
-    )
-
-    canvas.create_polygon(
-        900, 600, 700, 600, 900, 400,
-        fill="#0A6B94",
-        outline=""
-    )
-
-    #título
-    canvas.create_text(
-        450, 35,
-        text="Use os botões abaixo da tela",
-        fill=BRANCO,
-        font=("Arial", 22, "bold")
-    )
-
-    #informação da conta
-    canvas.create_text(
-        450, 75,
-        text=f"Conta: {conta_atual}   |   Saldo: R$ {saldo},00",
-        fill=BRANCO,
-        font=("Arial", 13, "bold")
-    )
-
-    #botões no mesmo estilo da imagem
-    botao(
-        "CONSULTAR SALDO",
-        45, 120,
-        consultar,
-        "esquerda"
-    )
-
-    botao(
-        "SACAR",
-        485, 120,
-        sacar,
-        "direita"
-    )
-
-    botao(
-        "DEPOSITAR",
-        45, 205,
-        depositar,
-        "esquerda"
-    )
-
-    botao(
-        "SAIR",
-        485, 205,
-        sair,
-        "direita"
-    )
-
-    #area de informaçoes
-    canvas.create_rectangle(
-        45, 310, 855, 500,
-        fill="#EAF1F3",
-        outline="#EAF1F3"
-    )
-
-    canvas.create_text(
-        450, 350,
-        text="CAIXA ELETRÔNICO",
-        fill=AZUL_ESCURO,
-        font=("Arial", 24, "bold")
-    )
-
-    canvas.create_text(
-        450, 395,
-        text="Escolha uma das opções acima",
-        fill=AZUL_ESCURO,
-        font=("Arial", 17)
-    )
-
-    canvas.create_text(
-        450, 435,
-        text="Use os botões para realizar suas operações.",
-        fill=AZUL_ESCURO,
-        font=("Arial", 14)
-    )
-
-    canvas.create_text(
-        450, 475,
-        text="Saldo inicial de uma conta nova: R$ 1.000,00",
-        fill=AZUL_ESCURO,
-        font=("Arial", 13)
-    )
-
-
-#operações
-def consultar():
-    messagebox.showinfo(
-        "SALDO E EXTRATO",
-        f"Seu saldo atual é:\n\nR$ {saldo},00"
-    )
-
-
-def depositar():
-    global saldo
-
-    valor = simpledialog.askstring(
-        "DEPOSITAR",
-        "Digite o valor inteiro para depósito:",
-        parent=janela
-    )
-
-    if valor is None:
-        return
-
-    if not valor.isdigit() or int(valor) <= 0:
-        messagebox.showerror(
-            "ERRO",
-            "Digite somente um valor inteiro positivo."
-        )
-        return
-
-    valor = int(valor)
-    saldo += valor
-
-    contas[conta_atual]["saldo"] = saldo
-    salvar()
-    mostrar_menu()
-
-    messagebox.showinfo(
-        "DEPÓSITO",
-        f"Depósito realizado com sucesso!\n\n"
-        f"Saldo atual: R$ {saldo},00"
-    )
-
-
-def sacar():
-    global saldo
-
-    valor = simpledialog.askstring(
-        "SAQUE",
-        "Digite o valor inteiro para saque:",
-        parent=janela
-    )
-
-    if valor is None:
-        return
-
-    if not valor.isdigit() or int(valor) <= 0:
-        messagebox.showerror(
-            "ERRO",
-            "Digite somente um valor inteiro positivo."
-        )
-        return
-
-    valor = int(valor)
-
-    if valor > saldo:
-        messagebox.showerror(
-            "ERRO",
-            "Saldo insuficiente."
-        )
-        return
-
-    #calcula as cédulas
-    restante = valor
-    cedulas = [100, 50, 20, 10, 5, 2, 1]
-    texto = ""
-
-    for cedula in cedulas:
-        quantidade = restante // cedula
-
-        if quantidade > 0:
-            texto += f"{quantidade} cédula(s) de R$ {cedula}\n"
-            restante %= cedula
-
-    saldo -= valor
-    contas[conta_atual]["saldo"] = saldo
-    salvar()
-    mostrar_menu()
-
-    messagebox.showinfo(
-        "SAQUE REALIZADO",
-        f"Saque realizado com sucesso!\n\n"
-        f"Entregar:\n{texto}\n"
-        f"Saldo atual: R$ {saldo},00"
-    )
-
-
-def sair():
-    salvar()
-    janela.destroy()
-
-
-#login
-def login():
-    global conta_atual, saldo
-
-    conta = simpledialog.askstring(
-        "CONTA",
-        "Digite sua conta:",
-        parent=janela
-    )
-
-    if not conta:
-        return
-
-    senha = simpledialog.askstring(
-        "SENHA",
-        "Digite sua senha:",
-        show="*",
-        parent=janela
-    )
-
-    if not senha:
-        return
-
-    #conta nova. Começa com R$ 1.000,00
-    if conta not in contas:
-        contas[conta] = {
-            "senha": senha,
-            "saldo": 1000
+    movimentacoes.append(
+        {
+            "id": max((item["id"] for item in movimentacoes), default=0) + 1,
+            "descricao": descricao,
+            "valor": valor,
+            "tipo": tipo,
+            "data": data,
         }
-        salvar()
-
-    conta_atual = conta
-    saldo = contas[conta]["saldo"]
-
-    mostrar_menu()
-
-
-#tela inicial
-def tela_inicial():
-    limpar()
-
-    canvas.create_polygon(
-        0, 0, 180, 0, 0, 180,
-        fill="#096C99",
-        outline=""
     )
+    try:
+        salvar_dados()
+    except OSError as erro:
+        movimentacoes.pop()
+        messagebox.showerror("Erro ao salvar", str(erro))
+        return
 
-    canvas.create_polygon(
-        0, 600, 190, 600, 0, 410,
-        fill=LARANJA,
-        outline=""
-    )
+    campo_descricao.delete(0, tk.END)
+    campo_valor.delete(0, tk.END)
+    campo_data.delete(0, tk.END)
+    atualizar_tela()
 
-    canvas.create_text(
-        450, 80,
-        text="CAIXA ELETRÔNICO",
-        fill=BRANCO,
-        font=("Arial", 32, "bold")
-    )
 
-    canvas.create_text(
-        450, 125,
-        text="Use os botões para acessar sua conta",
-        fill=BRANCO,
-        font=("Arial", 17)
-    )
+def excluir_movimentacao():
+    selecao = lista.curselection()
+    if not selecao:
+        messagebox.showwarning("Atenção", "Selecione uma movimentação para excluir.")
+        return
 
-    canvas.create_rectangle(
-        150, 180, 750, 500,
-        fill="#EAF1F3",
-        outline="#EAF1F3"
-    )
+    itens = sorted(movimentacoes, key=lambda item: item["id"])
+    item = itens[selecao[0]]
+    movimentacoes.remove(item)
+    try:
+        salvar_dados()
+    except OSError as erro:
+        movimentacoes.append(item)
+        messagebox.showerror("Erro ao salvar", str(erro))
+        atualizar_tela()
+        return
+    atualizar_tela()
 
-    canvas.create_text(
-        450, 225,
-        text="BEM-VINDO",
-        fill=AZUL_ESCURO,
-        font=("Arial", 26, "bold")
-    )
 
-    # Botão entrar
-    canvas.create_rectangle(
-        270, 290, 630, 350,
-        fill=AZUL_ESCURO,
-        outline=AZUL_ESCURO
-    )
-
-    canvas.create_text(
-        450, 320,
-        text="ENTRAR",
-        fill=BRANCO,
-        font=("Arial", 30, "bold")
-    )
-
-    canvas.create_rectangle(
-        270, 290, 630, 350,
-        fill="",
-        outline="",
-        tags=("entrar",)
-    )
-
-    canvas.tag_bind(
-        "entrar",
-        "<Button-1>",
-        lambda evento: login()
-    )
-
-    canvas.tag_bind(
-        "entrar",
-        "<Enter>",
-        lambda evento: canvas.config(cursor="hand2")
-    )
-
-    canvas.tag_bind(
-        "entrar",
-        "<Leave>",
-        lambda evento: canvas.config(cursor="")
+def gerar_relatorio():
+    receitas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Receita")
+    despesas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Despesa")
+    messagebox.showinfo(
+        "Relatório financeiro",
+        f"Total de receitas: R$ {receitas:.2f}\n"
+        f"Total de despesas: R$ {despesas:.2f}\n"
+        f"Saldo atual: R$ {receitas - despesas:.2f}\n"
+        f"Quantidade de movimentações: {len(movimentacoes)}",
     )
 
 
+try:
+    movimentacoes = carregar_dados()
+except (OSError, json.JSONDecodeError) as erro:
+    messagebox.showerror("Erro", f"Não foi possível carregar os dados:\n{erro}")
+    raise SystemExit(1)
 
-tela_inicial()
+janela = tk.Tk()
+janela.title("Controle de Gastos")
+janela.geometry("700x420")
 
-janela.protocol("WM_DELETE_WINDOW", sair)
+tk.Label(janela, text="Controle de Gastos Pessoais", font=("Arial", 16)).pack(pady=10)
+
+formulario = tk.Frame(janela)
+formulario.pack(pady=5)
+
+tk.Label(formulario, text="Descrição").grid(row=0, column=0)
+tk.Label(formulario, text="Valor").grid(row=0, column=1)
+tk.Label(formulario, text="Data (dd/mm/aaaa HH:MM)").grid(row=0, column=2)
+
+campo_descricao = tk.Entry(formulario, width=22)
+campo_descricao.grid(row=1, column=0, padx=4)
+campo_valor = tk.Entry(formulario, width=12)
+campo_valor.grid(row=1, column=1, padx=4)
+campo_data = tk.Entry(formulario, width=22)
+campo_data.grid(row=1, column=2, padx=4)
+
+tk.Button(
+    janela, text="Adicionar receita", command=lambda: adicionar_movimentacao("Receita")
+).pack(pady=3)
+tk.Button(
+    janela, text="Adicionar despesa", command=lambda: adicionar_movimentacao("Despesa")
+).pack(pady=3)
+
+lista = tk.Listbox(janela, width=90, height=10)
+lista.pack(padx=10, pady=8, fill="both", expand=True)
+
+saldo = tk.Label(janela)
+saldo.pack(pady=5)
+
+botoes = tk.Frame(janela)
+botoes.pack(pady=5)
+tk.Button(botoes, text="Excluir selecionada", command=excluir_movimentacao).pack(
+    side="left", padx=5
+)
+tk.Button(botoes, text="Gerar relatório", command=gerar_relatorio).pack(
+    side="left", padx=5
+)
+
+atualizar_tela()
 janela.mainloop()
