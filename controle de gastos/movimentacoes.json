@@ -1,0 +1,9 @@
+[
+    {
+        "id": 1,
+        "descricao": "Gasolina",
+        "valor": 450.0,
+        "tipo": "Despesa",
+        "data": "12/10/2025 12:12"
+    }
+]

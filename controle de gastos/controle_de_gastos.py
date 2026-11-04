@@ -1,89 +1,166 @@
-import tkinter as tk
-from tkinter import messagebox
 import json
 import os
+import tkinter as tk
+from datetime import datetime
+from tkinter import messagebox
 
-ARQUIVO = "arquivo.json"
 
-if os.path.exists(ARQUIVO):
-    with open(ARQUIVO, "r", encoding="utf-8") as f:
+ARQUIVO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "movimentacoes.json")
+
+
+def carregar_dados():
+    if not os.path.exists(ARQUIVO):
+        return []
+    with open(ARQUIVO, "r", encoding="utf-8") as arquivo:
+        return json.load(arquivo)
+
+
+def salvar_dados():
+    with open(ARQUIVO, "w", encoding="utf-8") as arquivo:
+        json.dump(movimentacoes, arquivo, indent=4, ensure_ascii=False)
+
+
+def atualizar_tela():
+    lista.delete(0, tk.END)
+    for item in sorted(movimentacoes, key=lambda item: item["id"]):
+        lista.insert(
+            tk.END,
+            f"{item['id']} | {item['data']} | {item['tipo']} | "
+            f"R$ {item['valor']:.2f} | {item['descricao']}",
+        )
+
+    receitas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Receita")
+    despesas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Despesa")
+    saldo.config(
+        text=f"Receitas: R$ {receitas:.2f}   "
+        f"Despesas: R$ {despesas:.2f}   Saldo: R$ {receitas - despesas:.2f}"
+    )
+
+
+def adicionar_movimentacao(tipo):
+    descricao = campo_descricao.get().strip()
+    if not descricao:
+        messagebox.showerror("Erro", "Informe a descrição.")
+        return
+
+    try:
+        valor = float(campo_valor.get().replace(",", "."))
+        if valor <= 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Erro", "Informe um valor maior que zero.")
+        return
+
+    data = campo_data.get().strip()
+    if data:
         try:
-            movimentacoes = json.load(f)
-        except json.JSONDecodeError:
-            movimentacoes = []
-else:
-    movimentacoes = []
+            data = datetime.strptime(data, "%d/%m/%Y %H:%M").strftime("%d/%m/%Y %H:%M")
+        except ValueError:
+            messagebox.showerror("Erro", "Use a data no formato dd/mm/aaaa HH:MM.")
+            return
+    else:
+        data = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+    movimentacoes.append(
+        {
+            "id": max((item["id"] for item in movimentacoes), default=0) + 1,
+            "descricao": descricao,
+            "valor": valor,
+            "tipo": tipo,
+            "data": data,
+        }
+    )
+    try:
+        salvar_dados()
+    except OSError as erro:
+        movimentacoes.pop()
+        messagebox.showerror("Erro ao salvar", str(erro))
+        return
+
+    campo_descricao.delete(0, tk.END)
+    campo_valor.delete(0, tk.END)
+    campo_data.delete(0, tk.END)
+    atualizar_tela()
 
 
-def salvar():
-    with open(ARQUIVO, "w", encoding="utf-8") as f:
-        json.dump(movimentacoes, f, indent=4)
+def excluir_movimentacao():
+    selecao = lista.curselection()
+    if not selecao:
+        messagebox.showwarning("Atenção", "Selecione uma movimentação para excluir.")
+        return
 
-#opção 1
-def adc_receita():
-    descricao = input("Digite a descrição da receita: ")
-    valor = float(input("Digite o valor da receita: "))
-    data = input("Digite a data da receita (dd/mm/aaaa hh:mm): ")
+    itens = sorted(movimentacoes, key=lambda item: item["id"])
+    item = itens[selecao[0]]
+    movimentacoes.remove(item)
+    try:
+        salvar_dados()
+    except OSError as erro:
+        movimentacoes.append(item)
+        messagebox.showerror("Erro ao salvar", str(erro))
+        atualizar_tela()
+        return
+    atualizar_tela()
 
-    mov = {
-        "id": len(movimentacoes) + 1,
-        "descricao": descricao,
-        "valor": valor,
-        "tipo": "Receita",
-        "data": data
-    }
 
-    movimentacoes.append(mov)
-    salvar()
-    print("\n-- Receita adicionada com sucesso! --\n")
+def gerar_relatorio():
+    receitas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Receita")
+    despesas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Despesa")
+    messagebox.showinfo(
+        "Relatório financeiro",
+        f"Total de receitas: R$ {receitas:.2f}\n"
+        f"Total de despesas: R$ {despesas:.2f}\n"
+        f"Saldo atual: R$ {receitas - despesas:.2f}\n"
+        f"Quantidade de movimentações: {len(movimentacoes)}",
+    )
 
-#opção 2
-def adc_despesa():
-    descricao = input("Digite a descrição da despesa: ")
-    valor = float(input("Digite o valor da despesa: "))
-    data = input("Digite a data da despesa (dd/mm/aaaa hh:mm): ")
 
-    mov = {
-        "id": len(movimentacoes) + 1,
-        "descricao": descricao,
-        "valor": valor,
-        "tipo": "Despesa",
-        "data": data
-    }
+try:
+    movimentacoes = carregar_dados()
+except (OSError, json.JSONDecodeError) as erro:
+    messagebox.showerror("Erro", f"Não foi possível carregar os dados:\n{erro}")
+    raise SystemExit(1)
 
-    movimentacoes.append(mov)
-    salvar()
-    print("\n-- Despesa adicionada com sucesso! --\n")
+janela = tk.Tk()
+janela.title("Controle de Gastos")
+janela.geometry("700x420")
 
-#Menu
-while True:
-    print("\n-----------MENU-----------")
-    
-    while True:
-        print("1 - Adicionar Receita")
-        print("2 - Adicionar Despesa")
-        print("3 - Listar Movimentações")
-        print("4 - Consultar Saldo")
-        print("5 - Excluir Movimentação")
-        print("6 - Gerar Relatório")
-        print("7 - Sair")
+tk.Label(janela, text="Controle de Gastos Pessoais", font=("Arial", 16)).pack(pady=10)
 
-        opcao = input("Escolha: ")
+formulario = tk.Frame(janela)
+formulario.pack(pady=5)
 
-        if opcao == "1":
-            adc_receita()
-        elif opcao == "2":
-            adc_despesa()
-        elif opcao == "3":
-            list_mov()
-        elif opcao == "4":
-            consultar_saldo()
-        elif opcao == "5":
-            excluir_mov()
-        elif opcao == "6":
-            gerar_relatorio()
-        elif opcao == "7":  
-            print("\n--Saindo do programa!--")
-            break    
-        else:   
-            print("\n--Opção inválida!--")
+tk.Label(formulario, text="Descrição").grid(row=0, column=0)
+tk.Label(formulario, text="Valor").grid(row=0, column=1)
+tk.Label(formulario, text="Data (dd/mm/aaaa HH:MM)").grid(row=0, column=2)
+
+campo_descricao = tk.Entry(formulario, width=22)
+campo_descricao.grid(row=1, column=0, padx=4)
+campo_valor = tk.Entry(formulario, width=12)
+campo_valor.grid(row=1, column=1, padx=4)
+campo_data = tk.Entry(formulario, width=22)
+campo_data.grid(row=1, column=2, padx=4)
+
+tk.Button(
+    janela, text="Adicionar receita", command=lambda: adicionar_movimentacao("Receita")
+).pack(pady=3)
+tk.Button(
+    janela, text="Adicionar despesa", command=lambda: adicionar_movimentacao("Despesa")
+).pack(pady=3)
+
+lista = tk.Listbox(janela, width=90, height=10)
+lista.pack(padx=10, pady=8, fill="both", expand=True)
+
+saldo = tk.Label(janela)
+saldo.pack(pady=5)
+
+botoes = tk.Frame(janela)
+botoes.pack(pady=5)
+tk.Button(botoes, text="Excluir selecionada", command=excluir_movimentacao).pack(
+    side="left", padx=5
+)
+tk.Button(botoes, text="Gerar relatório", command=gerar_relatorio).pack(
+    side="left", padx=5
+)
+
+atualizar_tela()
+janela.mainloop()
