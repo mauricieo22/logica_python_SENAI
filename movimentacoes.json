@@ -1,9 +1,9 @@
 [
     {
-        "id": 2,
-        "descricao": "Salário",
-        "valor": 3000.0,
-        "tipo": "Receita",
-        "data": "22/10/2026 08:00"
+        "tipo": "Saída",
+        "codigo": 1,
+        "produto": "roda",
+        "quantidade": 10,
+        "data": "04/11/2026 20:45"
     }
 ]

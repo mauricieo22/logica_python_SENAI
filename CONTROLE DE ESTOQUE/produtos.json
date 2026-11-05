@@ -1,0 +1,9 @@
+[
+    {
+        "codigo": 12345,
+        "nome": "chave de fenda",
+        "quantidade": 10,
+        "estoque_minimo": 5,
+        "preco": 4.69
+    }
+]

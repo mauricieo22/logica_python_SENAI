@@ -36,13 +36,14 @@ def atualizar_tela():
         f"Despesas: R$ {despesas:.2f}   Saldo: R$ {receitas - despesas:.2f}"
     )
 
-
+#adicionar movimentaçao
 def adicionar_movimentacao(tipo):
-    descricao = campo_descricao.get().strip()
+    #descrição
+    descricao = campo_descricao.get().strip() 
     if not descricao:
         messagebox.showerror("Erro", "Informe a descrição.")
         return
-
+    #valor
     try:
         valor = float(campo_valor.get().replace(",", "."))
         if valor <= 0:
@@ -50,7 +51,7 @@ def adicionar_movimentacao(tipo):
     except ValueError:
         messagebox.showerror("Erro", "Informe um valor maior que zero.")
         return
-
+    #data
     data = campo_data.get().strip()
     if data:
         try:
@@ -82,7 +83,7 @@ def adicionar_movimentacao(tipo):
     campo_data.delete(0, tk.END)
     atualizar_tela()
 
-
+#excluir movimentaçao
 def excluir_movimentacao():
     selecao = lista.curselection()
     if not selecao:
@@ -101,7 +102,7 @@ def excluir_movimentacao():
         return
     atualizar_tela()
 
-
+#gerar relatório
 def gerar_relatorio():
     receitas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Receita")
     despesas = sum(item["valor"] for item in movimentacoes if item["tipo"] == "Despesa")
@@ -141,11 +142,8 @@ campo_data = tk.Entry(formulario, width=22)
 campo_data.grid(row=1, column=2, padx=4)
 
 tk.Button(
-    janela, text="Adicionar receita", command=lambda: adicionar_movimentacao("Receita")
-).pack(pady=3)
-tk.Button(
-    janela, text="Adicionar despesa", command=lambda: adicionar_movimentacao("Despesa")
-).pack(pady=3)
+    janela, text="Adicionar receita", command=lambda: adicionar_movimentacao("Receita")).pack(pady=3)
+tk.Button(janela, text="Adicionar despesa", command=lambda: adicionar_movimentacao("Despesa")).pack(pady=3)
 
 lista = tk.Listbox(janela, width=90, height=10)
 lista.pack(padx=10, pady=8, fill="both", expand=True)

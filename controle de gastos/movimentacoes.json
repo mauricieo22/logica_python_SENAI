@@ -1,9 +1,30 @@
 [
     {
         "id": 1,
-        "descricao": "Gasolina",
-        "valor": 450.0,
+        "descricao": "Salário",
+        "valor": 5000.0,
+        "tipo": "Receita",
+        "data": "01/10/2026 08:00"
+    },
+    {
+        "id": 2,
+        "descricao": "gasolina",
+        "valor": 400.0,
         "tipo": "Despesa",
-        "data": "12/10/2025 12:12"
+        "data": "12/10/2026 12:12"
+    },
+    {
+        "id": 3,
+        "descricao": "Financiamento",
+        "valor": 1000.0,
+        "tipo": "Despesa",
+        "data": "13/10/2026 08:00"
+    },
+    {
+        "id": 4,
+        "descricao": "internet",
+        "valor": 120.0,
+        "tipo": "Despesa",
+        "data": "13/10/2026 22:11"
     }
 ]
