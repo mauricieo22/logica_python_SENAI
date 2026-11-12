@@ -2,21 +2,21 @@
     {
         "codigo": 12345,
         "nome": "chave de fenda",
-        "quantidade": 10,
+        "quantidade": 0,
         "estoque_minimo": 5,
         "preco": 4.69
     },
     {
         "codigo": 1,
         "nome": "roda",
-        "quantidade": 90,
+        "quantidade": 95,
         "estoque_minimo": 20,
         "preco": 50.0
     },
     {
         "codigo": 2,
         "nome": "hélice",
-        "quantidade": 20,
+        "quantidade": 19,
         "estoque_minimo": 5,
         "preco": 100.0
     }

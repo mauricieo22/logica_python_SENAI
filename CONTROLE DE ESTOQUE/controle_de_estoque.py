@@ -2,8 +2,9 @@ import json
 import os
 from datetime import datetime
 
-ARQUIVO_PRODUTOS = "produtos.json"
-ARQUIVO_MOVIMENTACOES = "movimentacoes.json"
+PASTA_PROGRAMA = os.path.dirname(os.path.abspath(__file__))
+ARQUIVO_PRODUTOS = os.path.join(PASTA_PROGRAMA, "produtos.json")
+ARQUIVO_MOVIMENTACOES = os.path.join(PASTA_PROGRAMA, "movimentacoes.json")
 
 
 #carrega os produtos salvos no arquivo .json
@@ -24,7 +25,7 @@ def salvar_produtos(produtos):
         json.dump(produtos, arquivo, indent=4, ensure_ascii=False)
 
 
-#carrega o histórico de entradas e saídas
+# carrega o histórico de entradas e saídas
 def carregar_movimentacoes():
     try:
         with open(ARQUIVO_MOVIMENTACOES, "r", encoding="utf-8") as arquivo:
@@ -306,19 +307,22 @@ def menu():
     movimentacoes = carregar_movimentacoes()
 
     while True:
-        print("\n========== CONTROLE DE ESTOQUE ==========")
-        print("1 - Cadastrar produto")
-        print("2 - Alterar produto")
-        print("3 - Excluir produto")
-        print("4 - Listar produtos")
-        print("5 - Registrar entrada")
-        print("6 - Registrar saída")
-        print("7 - Consultar produto")
-        print("8 - Produtos com estoque baixo")
-        print("9 - Relatório de movimentações")
-        print("0 - Sair")
+        
+        print("\n    -- CONTROLE DE ESTOQUE --            ")
+        print("---------------------------------")
+        print("|1 - Cadastrar produto          |")
+        print("|2 - Alterar produto            |")
+        print("|3 - Excluir produto            |")
+        print("|4 - Listar produtos            |")
+        print("|5 - Registrar entrada          |")
+        print("|6 - Registrar saída            |")
+        print("|7 - Consultar produto          |")
+        print("|8 - Produtos com estoque baixo |")
+        print("|9 - Relatório de movimentações |")
+        print("|0 - Sair                       |")
+        print("---------------------------------")
 
-        opcao = input("Escolha uma opção: ")
+        opcao = input("\nEscolha uma opção: ")
 
         try:
             if opcao == "1":
@@ -340,7 +344,7 @@ def menu():
             elif opcao == "9":
                 relatorio_movimentacoes(movimentacoes)
             elif opcao == "0":
-                print("Programa encerrado.")
+                print("\nPROGRAMA ENCERRADO.\n")
                 break
             else:
                 print("Opção inválida. Tente novamente.")

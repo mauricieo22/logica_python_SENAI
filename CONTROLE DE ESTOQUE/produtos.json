@@ -1,9 +1,37 @@
 [
     {
-        "codigo": 12345,
-        "nome": "chave de fenda",
-        "quantidade": 10,
-        "estoque_minimo": 5,
-        "preco": 4.69
+        "codigo": 1,
+        "nome": "CHAVE DE FENDA",
+        "quantidade": 100,
+        "estoque_minimo": 50,
+        "preco": 4.89
+    },
+    {
+        "codigo": 2,
+        "nome": "ALICATE",
+        "quantidade": 100,
+        "estoque_minimo": 50,
+        "preco": 8.89
+    },
+    {
+        "codigo": 3,
+        "nome": "PARAFUSO",
+        "quantidade": 1000,
+        "estoque_minimo": 550,
+        "preco": 0.25
+    },
+    {
+        "codigo": 4,
+        "nome": "BORRACHA DE VEDAÇÃO",
+        "quantidade": 80,
+        "estoque_minimo": 50,
+        "preco": 3.99
+    },
+    {
+        "codigo": 5,
+        "nome": "ÓLEO DE MOTOR 4T",
+        "quantidade": 50,
+        "estoque_minimo": 30,
+        "preco": 29.99
     }
 ]

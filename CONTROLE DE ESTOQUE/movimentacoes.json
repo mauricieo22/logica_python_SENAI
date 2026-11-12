@@ -1,0 +1,23 @@
+[
+    {
+        "tipo": "Saída",
+        "codigo": 4,
+        "produto": "BORRACHA DE VEDAÇÃO",
+        "quantidade": 60,
+        "data": "11/11/2026 21:25"
+    },
+    {
+        "tipo": "Saída",
+        "codigo": 4,
+        "produto": "BORRACHA DE VEDAÇÃO",
+        "quantidade": 60,
+        "data": "11/11/2026 21:26"
+    },
+    {
+        "tipo": "Entrada",
+        "codigo": 4,
+        "produto": "BORRACHA DE VEDAÇÃO",
+        "quantidade": 50,
+        "data": "11/11/2026 21:26"
+    }
+]
