@@ -16,7 +16,7 @@
     {
         "codigo": 3,
         "nome": "PARAFUSO",
-        "quantidade": 1000,
+        "quantidade": 999,
         "estoque_minimo": 550,
         "preco": 0.25
     },

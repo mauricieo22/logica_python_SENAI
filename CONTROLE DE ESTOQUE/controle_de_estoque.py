@@ -25,7 +25,7 @@ def salvar_produtos(produtos):
         json.dump(produtos, arquivo, indent=4, ensure_ascii=False)
 
 
-# carrega o histórico de entradas e saídas
+# carrega o histórico de entradas e saídas em um .json diferente
 def carregar_movimentacoes():
     try:
         with open(ARQUIVO_MOVIMENTACOES, "r", encoding="utf-8") as arquivo:
